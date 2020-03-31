@@ -1,4 +1,5 @@
 import java.security.NoSuchAlgorithmException;
+import java.lang.IllegalStateException;
 
 import java.nio.charset.StandardCharsets;
 
@@ -13,16 +14,12 @@ public class User {
 	private String username;
 	private String password;
 
-	public User(String username, String password) throws NoSuchAlgorithmException{
-		try {
-			this.username = username;
-			this.password = hashString(password);
-		} catch (NoSuchAlgorithmException except) {
-			throw except;
-		}
+	public User(final String username, final String password) {
+		this.username = username;
+		this.password = hashString(password);
 	}
 
-	private String hashString(final String input) throws NoSuchAlgorithmException{
+	private String hashString(final String input) {
 		try {
 			byte[] hashed;
 
@@ -32,11 +29,13 @@ public class User {
 			return String.format("%064x", new BigInteger(1, hashed));
 
 		} catch (NoSuchAlgorithmException except) {
-			throw except;
+			//hardcoded to "SHA-256", will never throw
+			throw new IllegalStateException();
 		}
 	}
 
 	public String toString() {
 		return String.join(":", username, password);
 	}
+
 }

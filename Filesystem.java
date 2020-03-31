@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.lang.InterruptedException;
+import java.io.FileNotFoundException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -12,53 +13,38 @@ import java.lang.Runtime;
 
 public class Filesystem {
 
-	private String configPath;
-	private File configFile;
-	private String diskPath;
-	private File diskFile;
+	private Disk disk__;
+	private Passwd passwd__;
 
-	public Filesystem(final String configPath, final String diskPath) {
-		this.configPath = configPath;
-		this.configFile = new File(configPath);
-
-		this.diskPath = diskPath;
-		this.diskFile = new File(diskPath);
+	public Filesystem(final File diskFile, final File passwdFile) {
+		this.disk__ = new Disk(diskFile);
+		this.passwd__ = new Passwd(passwdFile);
 	}
 
-	public boolean isInstalled() {
-		return (configFile.exists() && !configFile.isDirectory()) || (diskFile.exists() && !diskFile.isDirectory());
+	public boolean exists() {
+		return disk__.exists() || passwd__.exists();
 	}
 
-	public void makeConfig() throws IOException{
-		if (!configFile.createNewFile()) {
-			throw new IOException("Config file already created.");
-		}
-	}
-
-	public void makeDisk(final String size) throws IOException, InterruptedException{
-		try {
-			Runtime.getRuntime().exec(new String[] {"fallocate", "-l", size, diskPath}).waitFor();
-			Runtime.getRuntime().exec(new String[] {"mkfs.exfat", diskPath}).waitFor();
-		} catch (IOException | InterruptedException except) {
-			throw except;
+	public void create(final String format, final String size) throws IOException, InterruptedException{
+		if (this.exists()) {
+			throw new IOException("Filesystem already exists.");
 		}
 
+		passwd__.create();
+		disk__.create(format, size);
+
 	}
 
-	public void addUser(final User user) throws IOException{
-		try {
-			if (!this.isInstalled()) {
-				throw new IOException("Not installed.");
-			}
-
-			FileWriter writer = new FileWriter(configFile, true);
-			writer.write(String.format("%s\n", user.toString()));
-			writer.close();
-
-		} catch (IOException except) {
-			throw except;
-		}
+	public void registerUser(final User user) throws IOException{
+		passwd__.useradd(user);
 	}
 
+	public boolean auth(final User user) throws FileNotFoundException{
+		return passwd__.auth(user);
+	}
+
+	public void mount(final String mountpoint) throws IOException, InterruptedException{	
+		disk__.mount(mountpoint);
+	}
 
 }

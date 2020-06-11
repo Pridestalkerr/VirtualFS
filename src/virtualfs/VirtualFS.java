@@ -19,12 +19,10 @@ public class VirtualFS {
 	private Config config__;
 	private HashMap <String, Info> sysInfos__;
 
-	public VirtualFS(final Path configPath) {
+	public VirtualFS(final Path configPath) throws IOException {
 		config__ = new Config(configPath);
-	}
+		sysInfos__ = new HashMap <String, Info>();
 
-	public void init() throws IOException {
-		config__.create();
 		Info[] infos = config__.parse();
 		for (Info info : infos) {
 			sysInfos__.put(info.hostname, info);
@@ -38,7 +36,7 @@ public class VirtualFS {
 			return null;
 		}
 
-		return new System(null);
+		return new System(sysInfo);
 	}
 
 }

@@ -7,9 +7,13 @@ import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 // exceptions
 import java.io.IOException;
+import java.lang.InterruptedException;
 
 // statics
 import static java.lang.System.out;
@@ -107,19 +111,47 @@ public class Main {
 	static String BASE_PATH = "/root/.vfs/";
 
 	public static String prettify(final String user, final String hostname) {
-		return String.format("%s%s@%s%s $%s ", Color.MAGENTA_BOLD_BRIGHT, user, hostname, Color.RED_BOLD_BRIGHT, Color.WHITE);
+		return String.format(
+			"%s%s@%s%s $%s ",
+			Color.MAGENTA_BOLD_BRIGHT,
+			user,
+			hostname,
+			Color.RED_BOLD_BRIGHT,
+			Color.WHITE
+		);
 	}
 
-	public static void runShell(final String user, final String hostname) {
+	public static void
+	runShell(
+		final String user,
+		final String hostname,
+		virtualfs.system.System sys
+	) throws IOException, InterruptedException {
 
 		Scanner in = new Scanner(System.in);
 		while (true) {
 
 	        out.printf("%s", prettify(user, hostname));
 
-			in.nextLine();
+			String command = in.nextLine();
 
+			if (command.equals("exit")) {
+				break;
+			}
+
+			InputStream output = sys.exec(command);
+
+			BufferedReader br = new BufferedReader(
+				new InputStreamReader(output)
+			);
+			String line;
+
+			while ((line = br.readLine()) != null) {
+	            out.println(line);
+	        }
 		}
+
+
 
 		// File fd = sys.open("/aaaa/aaa/a", "rwb");
 		// fd.read(100);
@@ -128,14 +160,15 @@ public class Main {
 		// sys.logout();
 	}
 
-	public static void main(final String[] args) {
+	public static void
+	main(final String[] args) throws IOException, InterruptedException {
 
 		// vfs root@host0
 		// password: 
 		// niggacat
 		// root@host0 >
 
-		 VirtualFS vfs = new VirtualFS(Paths.get(BASE_PATH, "config"));
+		VirtualFS vfs = new VirtualFS(Paths.get(BASE_PATH, "config"));
 
 		String[] attempt = args[0].split("@");
 		String user = attempt[0];
@@ -147,9 +180,18 @@ public class Main {
 			System.exit(1);
 		}
 
-		sys.boot(Paths.get("/mnt/"));
+		out.println(sys.toString());
 
-		if (!sys.validUser(username)) {
+		sys.boot(Paths.get("/mnt/vfs/"));
+
+		Runtime.getRuntime().addShutdownHook(new Thread() { 
+			public void shutdown() throws IOException, InterruptedException {
+				out.println("system shutdown...");
+				sys.shutdown();
+			} 
+	    }); 
+
+		if (!sys.validUser(user)) {
 			out.println("Invalid user.");
 			System.exit(1);
 		}
@@ -162,9 +204,12 @@ public class Main {
 			TimeUnit.SECONDS.sleep(3);
 			out.println("Wrong password.");
 			out.printf("Password: ");
+			password = in.nextLine();
 		}
 
-		runShell(user, hostname);
+		runShell(user, hostname, sys);
+
+		sys.shutdown();
 
 		System.exit(0);
 	}

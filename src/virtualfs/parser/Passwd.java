@@ -1,13 +1,12 @@
 package virtualfs.parser;
+import virtualfs.system.User;
 
 // classes
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-
 import java.util.stream.Stream;
-
 import java.util.Collections;
 import java.util.ArrayList;
 
@@ -19,13 +18,12 @@ import static java.lang.System.out;
 
 
 
-
 public class Passwd {
 
 	private Path path__;
 
-	public Passwd(final String path) {
-		this.path__ = Paths.get(path).toAbsolutePath();
+	public Passwd(final Path path) {
+		path__ = path;
 	}
 
 	public boolean exists() throws IOException {
@@ -47,7 +45,12 @@ public class Passwd {
 			return null;
 		}
 
-		return Files.lines(path__).toArray(String[]::new);
+		String[] lines;
+
+		try (Stream <String> stream = Files.lines(path__)) {
+			lines = stream.toArray(String[]::new);
+		}
+		return lines;
 	}
 
 	public void addUser(final User user) throws IOException {
@@ -69,7 +72,13 @@ public class Passwd {
 
 		for (int itr = 0; itr < lines.length; ++itr) {
 			String[] config = lines[itr].split(":");
-			users[itr] = new User(config[0], config[1], config[2], config[3], config[4]);
+			users[itr] = new User(
+				config[0], 
+				Integer.parseInt(config[1]), 
+				Integer.parseInt(config[2]), 
+				config[3], 
+				config[4]
+			);
 		}
 
 		return users;

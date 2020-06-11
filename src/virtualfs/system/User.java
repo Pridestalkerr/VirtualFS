@@ -1,15 +1,17 @@
+package virtualfs.system;
+
+// classes
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.math.BigInteger;
+
+// exceptions
 import java.security.NoSuchAlgorithmException;
 import java.lang.IllegalStateException;
 
-import java.nio.charset.StandardCharsets;
-
-import java.security.MessageDigest;
-
-import java.math.BigInteger;
 
 
-
-public class User {
+public final class User {
 
 	private String username__;
 	private int uid__;
@@ -17,7 +19,13 @@ public class User {
 	private String home__;
 	private String password__;
 
-	public User(final String username, final int uid, final int gid, final String home, final String password) {
+	public User(
+		final String username,
+		final int uid,
+		final int gid,
+		final String home,
+		final String password
+	) {
 		username__ = username;
 		uid__ = uid;
 		gid__ = gid;
@@ -26,14 +34,43 @@ public class User {
 	}
 
 	public String toString() {
-		return String.join(":", username__, uid__, gid__, home__, password__);
+		return String.join(
+			":",
+			username__,
+			String.valueOf(uid__),
+			String.valueOf(gid__),
+			home__,
+			password__
+		);
 	}
 
-	public boolean compareHash(final String hash) {
-		if (hash.equals(password))
-			return true;
-		else
+	public boolean auth(final String username, String password) {
+		if (!username.equals(username__)) {
 			return false;
+		}
+
+		password = User.hashString(password);
+		if (!password.equals(password__)) {
+			return false;
+		}
+		
+		return true;
+	}
+
+	public String getName() {
+		return username__;
+	}
+
+	public int getUid() {
+		return uid__;
+	}
+
+	public int getGid() {
+		return gid__;
+	}
+
+	public String getHome() {
+		return home__;
 	}
 
 	public static String hashString(final String input) {

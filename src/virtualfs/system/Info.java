@@ -2,7 +2,7 @@ package virtualfs.system;
 
 import java.nio.file.Paths;
 import java.nio.file.Path;
-
+import java.util.Arrays;
 import java.util.ArrayList;
 
 
@@ -10,10 +10,11 @@ import java.util.ArrayList;
 public final class Info {
 
 	public String hostname;
-	public String main;
-	public String[] secondary;
+	public Path main;
+	public Path[] secondary;
 
-	public Info(final String hostname, final String main, final String[] secondary) {
+	public
+	Info(final String hostname, final Path main, final Path[] secondary) {
 		this.hostname = hostname;
 		this.main = main;
 		this.secondary = secondary.clone();
@@ -25,9 +26,16 @@ public final class Info {
 
 		repr.append(hostname);
 		repr.append(';');
-		repr.append(main);
+		repr.append(main.toString());
 		repr.append(':');
-		repr.append(String.join(",", secondary));
+		repr.append(
+			String.join(
+				",", 
+				Arrays.stream(secondary).map(
+					path -> path.toString()
+				).toArray(String[]::new)
+			)
+		);
 
 		return repr.toString();
 	}

@@ -1,78 +1,78 @@
-package virtualfs.parser;
+// package virtualfs.parser;
 
-// classes
-import java.nio.file.Paths;
-import java.nio.file.Path;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
+// // classes
+// import java.nio.file.Paths;
+// import java.nio.file.Path;
+// import java.nio.file.Files;
+// import java.nio.file.StandardOpenOption;
 
-import java.util.stream.Stream;
+// import java.util.stream.Stream;
 
-import java.util.Collections;
-import java.util.ArrayList;
+// import java.util.Collections;
+// import java.util.ArrayList;
 
-// exceptions
-import java.io.IOException;
+// // exceptions
+// import java.io.IOException;
 
-// statics
-import static java.lang.System.out;
-
-
+// // statics
+// import static java.lang.System.out;
 
 
-public class Passwd {
 
-	private Path path__;
 
-	public Passwd(final String path) {
-		this.path__ = Paths.get(path).toAbsolutePath();
-	}
+// public class Passwd {
 
-	public boolean exists() throws IOException {
-		return Files.exists(this.path__) && !Files.isDirectory(path__);
-	}
+// 	private Path path__;
 
-	public boolean create() throws IOException {
-		if (this.exists()) {
-			return false;
-		}
+// 	public Passwd(final String path) {
+// 		this.path__ = Paths.get(path).toAbsolutePath();
+// 	}
 
-		Files.createFile(path__);
+// 	public boolean exists() throws IOException {
+// 		return Files.exists(this.path__) && !Files.isDirectory(path__);
+// 	}
 
-		return true;
-	}
+// 	public boolean create() throws IOException {
+// 		if (this.exists()) {
+// 			return false;
+// 		}
 
-	private String[] read() throws IOException {
-		if (!this.exists()) {
-			return null;
-		}
+// 		Files.createFile(path__);
 
-		return Files.lines(path__).toArray(String[]::new);
-	}
+// 		return true;
+// 	}
 
-	public void addGroup(final User user) throws IOException {
-		Files.write(path__, Collections.singleton(user.toString()),
-			StandardOpenOption.CREATE,
-			StandardOpenOption.WRITE,
-			StandardOpenOption.APPEND
-		);
-	}
+// 	private String[] read() throws IOException {
+// 		if (!this.exists()) {
+// 			return null;
+// 		}
 
-	public User[] parse() throws IOException {
-		String[] lines = this.read();
+// 		return Files.lines(path__).toArray(String[]::new);
+// 	}
 
-		if (lines == null) {
-			return null;
-		}
+// 	public void addGroup(final User user) throws IOException {
+// 		Files.write(path__, Collections.singleton(user.toString()),
+// 			StandardOpenOption.CREATE,
+// 			StandardOpenOption.WRITE,
+// 			StandardOpenOption.APPEND
+// 		);
+// 	}
 
-		User[] users = new User[lines.length];
+// 	public User[] parse() throws IOException {
+// 		String[] lines = this.read();
 
-		for (int itr = 0; itr < lines.length; ++itr) {
-			String[] config = lines[itr].split(":");
-			users[itr] = new User(config[0], config[1], config[2], config[3], config[4]);
-		}
+// 		if (lines == null) {
+// 			return null;
+// 		}
 
-		return users;
-	}
+// 		User[] users = new User[lines.length];
 
-}
+// 		for (int itr = 0; itr < lines.length; ++itr) {
+// 			String[] config = lines[itr].split(":");
+// 			users[itr] = new User(config[0], config[1], config[2], config[3], config[4]);
+// 		}
+
+// 		return users;
+// 	}
+
+// }

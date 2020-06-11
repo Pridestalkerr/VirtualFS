@@ -8,13 +8,12 @@ import java.nio.file.Path;
 // exceptions
 import java.io.IOException;
 import java.lang.InterruptedException;
-
-
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+// statics
 import static java.lang.System.out;
+
 
 
 public class Partition {
@@ -23,10 +22,10 @@ public class Partition {
 	private String tag__;
 	private Path mountpoint__;
 
-	public Partition(final Path path) {
+	public Partition(final Path path, final String tag) {
 		path__ = path;
 		mountpoint__ = null;
-		tag__ = "taglol";
+		tag__ = tag;
 	}
 
 	public boolean exists() {
@@ -37,11 +36,16 @@ public class Partition {
 		return true;
 	} 
 
-	private void allocate(final String size) throws IOException, InterruptedException{
-		Process p = Runtime.getRuntime().exec(new String[] {"fallocate", "-l", size, path__.toString()});
+	private void 
+	allocate(final String size) throws IOException, InterruptedException{
+		Process p = Runtime.getRuntime().exec(
+			new String[] {"fallocate", "-l", size, path__.toString()}
+		);
 
 		p.waitFor();
-		BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		BufferedReader br = new BufferedReader(
+			new InputStreamReader(p.getInputStream())
+		);
 		String line;
 
 		while ((line = br.readLine()) != null) {
@@ -49,11 +53,16 @@ public class Partition {
         }
 	}
 
-	private void mkfs(final String format) throws IOException, InterruptedException{
-		Process p = Runtime.getRuntime().exec(new String[] {"mkfs.exfat", path__.toString()});
+	private void
+	mkfs(final String format) throws IOException, InterruptedException{
+		Process p = Runtime.getRuntime().exec(
+			new String[] {"mkfs.exfat", path__.toString()}
+		);
 
 		p.waitFor();
-		BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		BufferedReader br = new BufferedReader(
+			new InputStreamReader(p.getInputStream())
+		);
 		String line;
 
 		while ((line = br.readLine()) != null) {
@@ -61,7 +70,9 @@ public class Partition {
         }
 	}
 
-	public boolean create(final String format, final String size) throws IOException, InterruptedException {
+	public boolean
+	create(final String format, final String size) 
+	throws IOException, InterruptedException {
 		if (this.exists()) {
 			return false;
 		}
@@ -72,28 +83,58 @@ public class Partition {
 		return true;
 	}
 
-	private void setMountpoint(final String mountpoint) {
-		mountpoint__ = Paths.get(mountpoint).toAbsolutePath();
+	private void setMountpoint(final Path mountpoint) {
+		mountpoint__ = mountpoint;
 	}
 
-	public boolean mount(final String mountpoint) throws IOException, InterruptedException{
-		if (this.exists()) {
+	public boolean
+	mount(final Path mountpoint) throws IOException, InterruptedException{
+		if (!this.exists()) {
 			return false;
 		}
 
 		this.setMountpoint(mountpoint);
 
-		Runtime.getRuntime().exec(new String[] {"mount", path__.toString(), mountpoint__.toString()}).waitFor();
+		Process p = Runtime.getRuntime().exec(
+			new String[] {"mount", path__.toString(), mountpoint__.toString()}
+		);
+
+		p.waitFor();
+		BufferedReader br = new BufferedReader(
+			new InputStreamReader(p.getInputStream())
+		);
+		String line;
+
+		while ((line = br.readLine()) != null) {
+            out.println(line);
+        }
 
 		return true;
 	}
 
 	public void umount() throws IOException, InterruptedException {
-		Runtime.getRuntime().exec(new String[] {"umount", mountpoint__.toString()}).waitFor();
+		Process p = Runtime.getRuntime().exec(
+			new String[] {"umount", mountpoint__.toString()}
+		);
+
+		out.println(mountpoint__.toString());
+		p.waitFor();
+		BufferedReader br = new BufferedReader(
+			new InputStreamReader(p.getInputStream())
+		);
+		String line;
+
+		while ((line = br.readLine()) != null) {
+            out.println(line);
+        }
 	}
 
 	public String getPath() {
 		return path__.toString();
+	}
+
+	public String getTag() {
+		return tag__;
 	}
 
 	public String getMountpoint() {
